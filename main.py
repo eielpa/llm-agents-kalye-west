@@ -2,7 +2,7 @@ import os
 import litellm
 
 # 1. Set your Groq API Key
-os.environ["GROQ_API_KEY"] = "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"
+#os.environ["GROQ_API_KEY"] = "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"
 
 # 2. BUG FIX: Intercept the API call and remove the 'cache_breakpoint' property 
 # that CrewAI forces into the messages, which Groq's API strictly rejects.
