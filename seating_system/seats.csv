@@ -1,0 +1,4 @@
+seat_id,type,capacity,status
+S1,counter,1,free
+T1,table,2,occupied
+T2,table,4,occupied
