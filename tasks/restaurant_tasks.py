@@ -10,8 +10,17 @@ class RestaurantTasks:
 
     def take_order_task(self, agent, dish, allergen):
         return Task(
-            description=f"Customer ordered {dish}. They are allergic to {allergen}. Verify if the dish is safe.",
-            expected_output="A safety confirmation or a warning to the customer about their allergy.",
+            description=(
+                f"Customer ordered {dish}. They are allergic to {allergen}. "
+                f"First, verify if the dish is safe using the allergy checking tool. "
+                f"If the dish is safe, save the order with status 'confirmed'. "
+                f"If the dish contains the allergen, ask the Sushi Chef if the dish can be modified safely. "
+                f"If the Chef confirms it can be made safely, save the order with status 'confirmed_without_allergen'. "
+                f"If it cannot be made safely, do not save the order."
+            ),
+            expected_output=(
+                "A clear confirmation or warning. If the order is accepted, include the saved order ID and status."
+            ),
             agent=agent
         )
 

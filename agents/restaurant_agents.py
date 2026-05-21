@@ -1,6 +1,6 @@
 from crewai import Agent
 from seating_system.seating_tools import check_seat_availability, assign_seat
-from order_system.order_tools import check_allergens
+from order_system.order_tools import check_allergens, save_order, check_order_status
 from kitchen_system.kitchen_tools import process_order_stock
 
 class RestaurantAgents:
@@ -18,9 +18,9 @@ class RestaurantAgents:
     def waiter(self):
         return Agent(
             role="Waiter",
-            goal="Take customer orders accurately and ensure food safety regarding allergies.",
-            backstory="You are a knowledgeable sushi waiter. You protect customers by verifying menu items against their dietary restrictions.",
-            tools=[check_allergens],
+            goal="Take customer orders accurately, check allergies, save confirmed orders, and track order status.",            
+            backstory="You are a knowledgeable sushi waiter. You protect customers by verifying menu items against their dietary restrictions and recording safe orders.",
+            tools=[check_allergens, save_order, check_order_status],
             verbose=True,
             allow_delegation=True,
             llm="groq/llama-3.3-70b-versatile"
