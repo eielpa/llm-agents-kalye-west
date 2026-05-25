@@ -32,13 +32,14 @@ def run_simulation():
     t1 = tasks.customer_arrival_task(customer)
     t2 = tasks.seat_customer_task(seating_mgr, t1)
     t3 = tasks.customer_order_task(customer, t2)
-    t4 = tasks.kitchen_allergy_check_task(chef, t1, t3)
-    t5 = tasks.customer_decision_task(customer, t4)
-    t6 = tasks.finalize_cooking_task(chef, t5)
+    t4 = tasks.waiter_order_validation_task(waiter, t1, t3)
+    t5 = tasks.kitchen_allergy_check_task(chef, t4)
+    t6 = tasks.customer_decision_task(customer, t5)
+    t7 = tasks.finalize_cooking_task(chef, t6)
 
     restaurant_crew = Crew(
         agents=[customer, seating_mgr, waiter, chef],
-        tasks=[t1, t2, t3, t4, t5, t6],
+        tasks=[t1, t2, t3, t4, t5, t6, t7],
         process=Process.sequential
     )
 
