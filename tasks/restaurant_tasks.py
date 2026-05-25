@@ -30,18 +30,51 @@ class RestaurantTasks:
             agent=agent,
             context=[seating_task]
         )
-
-    def kitchen_allergy_check_task(self, agent, arrival_task, order_task):
+    
+    def waiter_order_validation_task(self, agent, arrival_task, order_task):
         return Task(
             description=(
-                f"Extract the customer's allergy from {arrival_task.description} and their ordered dish from {order_task.description}. "
-                "Run the 'Check and Update Stock' tool passing both variables, with 'dry_run' set to True. "
-                "If the tool returns a SAFETY ALERT block, stop and repeat those alternative suggestions to the customer. "
-                "If it returns a Kitchen Check success, reply that the dish is approved."
+                "Validate the customer's order before it goes to the kitchen. "
+                "Use the previous context to extract: "
+                "1) the customer's allergy profile, "
+                "2) the exact dish ordered by the customer. "
+                "Then call the tool named `check_menu_and_allergens` with input format 'Dish|Allergen'. "
+                "If the dish is not on the menu, reject the order and do not save it. "
+                "If the dish contains the customer's allergen, return ORDER_NEEDS_ALTERNATIVE and do not save it as confirmed. "
+                "If the dish is safe, call the tool named `save_order` with format "
+                "'Dish|Allergen|confirmed|validated by waiter'. "
+                "Your final answer must start with exactly one of these labels: "
+                "ORDER_CONFIRMED, ORDER_REJECTED, or ORDER_NEEDS_ALTERNATIVE."
+                "Always include the exact dish name and allergy in your final answer."
             ),
-            expected_output="The exact feedback or safety alternatives returned by the kitchen tool.",
+            expected_output=(
+                "A short order validation result. If safe, include the saved order ID. "
+                "If unsafe or unavailable, explain why the order was not confirmed."
+            ),
             agent=agent,
             context=[arrival_task, order_task]
+        )
+
+    def kitchen_allergy_check_task(self, agent, waiter_task):
+        return Task(
+            description=(
+                "Read the Waiter order validation result from the previous context. "
+                "If the Waiter result starts with ORDER_REJECTED, stop immediately and return the same rejection reason. "
+                "Do not check stock, do not suggest alternatives, and do not prepare any dish. "
+                "If the Waiter result starts with ORDER_NEEDS_ALTERNATIVE, suggest safe alternatives only. "
+                "Do not prepare the unsafe dish. "
+                "If the Waiter result starts with ORDER_CONFIRMED, extract the exact confirmed dish and allergy, then run the "
+                "'Check and Update Stock' tool with dry_run set to True. "
+                "If the tool returns a safety alert, repeat the safe alternatives. "
+                "If it returns a Kitchen Check success, reply that the dish is approved."
+            ),
+            expected_output=(
+                "If rejected: the same ORDER_REJECTED message from the Waiter. "
+                "If alternative needed: safe alternatives only. "
+                "If confirmed: the exact kitchen dry-run feedback."
+            ),
+            agent=agent,
+            context=[waiter_task]
         )
 
     def customer_decision_task(self, agent, kitchen_task):
