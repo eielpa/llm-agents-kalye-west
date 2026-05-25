@@ -1,5 +1,4 @@
 from crewai import Agent, LLM
-from seating_system.seating_tools import check_seat_availability, assign_seat
 from order_system.order_tools import check_allergens
 from kitchen_system.kitchen_tools import process_order_stock
 
@@ -9,18 +8,6 @@ groq_llm = LLM(
 )
 
 class RestaurantAgents:
-    def seating_manager(self):
-        return Agent(
-            role="Seating Manager",
-            goal="Seat arriving groups instantly using 1 sentence.",
-            backstory="Host at Kalye West. You extract the group size, run your tools once, and output the table assignment.",
-            tools=[check_seat_availability, assign_seat],
-            verbose=True,
-            allow_delegation=False,
-            max_iter=3,
-            llm=groq_llm
-        )
-
     def waiter(self):
         return Agent(
             role="Waiter",
