@@ -1,4 +1,6 @@
 seat_id,type,capacity,status
 S1,counter,1,free
-T1,table,2,occupied
+S2,counter,1,free
+S3,counter,1,free
+T1,table,2,free
 T2,table,4,occupied

@@ -1,4 +1,5 @@
 dish,ingredients,allergens,prep_time
 Salmon Nigiri,"salmon,rice",fish,3
 Tuna Roll,"tuna,rice,nori,sesame","fish,sesame",5
-Cucumber Maki,"cucumber,rice,nori",,4
+Cucumber Maki,"cucumber,rice,nori,sesame","sesame",4
+Tuna Nigiri,"tuna,rice",fish,3
