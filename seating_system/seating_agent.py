@@ -1,5 +1,5 @@
 from crewai import Agent, LLM
-from seating_system.seating_tools import check_seat_availability, assign_seat
+from seating_system.seating_tools import check_seat_availability, assign_seat, update_seat_status, save_reservation
 
 groq_llm = LLM(
     model="groq/llama-3.3-70b-versatile",
@@ -12,7 +12,7 @@ class SeatingSystem:
             role="Seating Manager",
             goal="Seat arriving groups instantly using 1 sentence.",
             backstory="Host at Kalye West. You extract the group size, run your tools once, and output the table assignment.",
-            tools=[check_seat_availability, assign_seat],
+            tools=[check_seat_availability, assign_seat, update_seat_status, save_reservation],
             verbose=True,
             allow_delegation=False,
             max_iter=3,

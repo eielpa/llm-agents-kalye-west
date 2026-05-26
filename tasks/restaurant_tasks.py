@@ -13,8 +13,12 @@ class RestaurantTasks:
 
     def seat_customer_task(self, agent, arrival_task):
         return Task(
-            description=f"Read the customer's arrival log in {arrival_task.description}. Extract the party size, verify availability, and assign the seat using your tools.",
-            expected_output="A 1-sentence confirmation containing the assigned seat ID.",
+            description=(
+                f"Read the customer's arrival log in {arrival_task.description}. "
+                "Extract the party size, verify availability with 'Check Seat Availability', and assign the seat with 'Assign Seat'. "
+                "Then call 'Save Reservation' with format 'seat_id|party_size' to log the reservation."
+            ),
+            expected_output="A 1-sentence confirmation containing the assigned seat ID and the reservation ID.",
             agent=agent,
             context=[arrival_task]
         )

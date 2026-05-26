@@ -12,7 +12,7 @@ except ImportError:
 
 from crewai import Crew, Process
 from agents.restaurant_agents import RestaurantAgents
-from agents.customer_agent import CustomerSystem
+from customer_system.customer_agent import CustomerSystem
 from tasks.restaurant_tasks import RestaurantTasks
 from seating_system.seating_agent import SeatingSystem
 
