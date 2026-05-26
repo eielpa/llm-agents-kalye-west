@@ -29,7 +29,10 @@ class RestaurantTasks:
     def customer_order_task(self, agent, seating_task):
         return Task(
             description=(
-                f"You are seated at your table via {seating_task.description}. Execute the 'View Restaurant Menu' tool. "
+                "Read the seating result from the previous context. "
+                "If the seating result contains 'No seats available', output exactly: "
+                "'NO_SEATS: Cannot order, no table was assigned.' and stop — do not call any tool. "
+                "Otherwise, execute the 'View Restaurant Menu' tool. "
                 "Pick exactly ONE dish from the list completely at random (do not look at the allergen column, just choose blindly). "
                 "State your order clearly to the staff in 1 sentence."
             ),
@@ -51,7 +54,10 @@ class RestaurantTasks:
                 "If the dish is safe, call the tool named `save_order` with format "
                 "'Dish|Allergen|confirmed|validated by waiter'. "
                 "Your final answer must start with exactly one of these labels: "
-                "ORDER_CONFIRMED, ORDER_REJECTED, or ORDER_NEEDS_ALTERNATIVE. "
+                "ORDER_CONFIRMED, ORDER_REJECTED, or ORDER_NEEDS_ALTERNATIVE. " \
+                "As soon as the tool returns ORDER_NEEDS_ALTERNATIVE, write your final answer "
+                "immediately starting with ORDER_NEEDS_ALTERNATIVE, include the dish name and "
+                "the allergen, and stop — do not call any tool again."
                 "Always include the exact dish name and allergy in your final answer."
             ),
             expected_output=(
