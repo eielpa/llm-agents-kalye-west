@@ -12,15 +12,16 @@ except ImportError:
 
 from crewai import Crew, Process
 from agents.restaurant_agents import RestaurantAgents
-from agents.customer_agent import CustomerSystem
+from customer_system.customer_agent import CustomerSystem
 from tasks.restaurant_tasks import RestaurantTasks
+from seating_system.seating_agent import SeatingSystem
 
 def run_simulation():
     print(f"\n--- STARTING FULLY AUTONOMOUS RESTAURANT SIMULATION ---")
 
     # Initialize agents
+    seating_mgr = SeatingSystem().seating_manager()
     rest_agents = RestaurantAgents()
-    seating_mgr = rest_agents.seating_manager()
     waiter = rest_agents.waiter()
     chef = rest_agents.sushi_chef()
     
