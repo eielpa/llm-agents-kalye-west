@@ -30,7 +30,7 @@ class RestaurantTasks:
             agent=agent,
             context=[seating_task]
         )
-    
+
     def waiter_order_validation_task(self, agent, arrival_task, order_task):
         return Task(
             description=(
@@ -44,7 +44,7 @@ class RestaurantTasks:
                 "If the dish is safe, call the tool named `save_order` with format "
                 "'Dish|Allergen|confirmed|validated by waiter'. "
                 "Your final answer must start with exactly one of these labels: "
-                "ORDER_CONFIRMED, ORDER_REJECTED, or ORDER_NEEDS_ALTERNATIVE."
+                "ORDER_CONFIRMED, ORDER_REJECTED, or ORDER_NEEDS_ALTERNATIVE. "
                 "Always include the exact dish name and allergy in your final answer."
             ),
             expected_output=(
