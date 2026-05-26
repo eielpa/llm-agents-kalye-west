@@ -34,7 +34,7 @@ def view_restaurant_menu(query: str = "") -> str:
         return f"Error reading menu: {str(e)}"
 
 
-@tool("Check Menu And Allergenes")
+@tool
 def check_menu_and_allergens(query: str) -> str:
     """
     Pass a string formatted as 'Dish_Name|Allergen'.
@@ -70,7 +70,7 @@ def check_menu_and_allergens(query: str) -> str:
         return f"ORDER_ERROR: Ensure format is 'Dish|Allergen'. Details: {str(e)}"
 
 
-@tool("Save Customer Order")
+@tool
 def save_order(query: str) -> str:
     """
     Pass a string formatted as 'Dish_Name|Allergen|Status|Notes'.

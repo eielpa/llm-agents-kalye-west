@@ -26,15 +26,12 @@ class RestaurantTasks:
             context=[arrival_task]
         )
 
-    def customer_order_task(self, agent, seating_task):
+    def customer_order_task(self, agent, seating_task, menu_string=""):
         return Task(
             description=(
-                "Read the seating result from the previous context. "
-                "If the seating result contains 'No seats available', output exactly: "
-                "'NO_SEATS: Cannot order, no table was assigned.' and stop — do not call any tool. "
-                "Otherwise, execute the 'View Restaurant Menu' tool. "
-                "Pick exactly ONE dish from the list completely at random (do not look at the allergen column, just choose blindly). "
-                "State your order clearly to the staff in 1 sentence."
+                f"Read the seating result from the previous context. If it contains 'No seats available', stop.\n"
+                f"Otherwise, look at this restaurant menu:\n\n{menu_string}\n\n"
+                "Pick exactly ONE dish from this list completely at random. State your order clearly to the staff in 1 sentence without mentioning allergies."
             ),
             expected_output="A 1-sentence order stating the exact dish name you chose.",
             agent=agent,
@@ -71,19 +68,18 @@ class RestaurantTasks:
     def kitchen_allergy_check_task(self, agent, waiter_task):
         return Task(
             description=(
-                "Read the Waiter order validation result from the previous context. "
-                "If the Waiter result starts with ORDER_REJECTED, stop immediately and return the same rejection reason. "
-                "Do not check stock, do not suggest alternatives, and do not prepare any dish. "
-                "If the Waiter result starts with ORDER_NEEDS_ALTERNATIVE, suggest safe alternatives only. "
-                "Do not prepare the unsafe dish. "
-                "If the Waiter result starts with ORDER_CONFIRMED, extract the exact confirmed dish and allergy, then run the "
-                "'Check and Update Stock' tool with dry_run set to True. "
-                "If the tool returns a safety alert, repeat the safe alternatives. "
+                "Read the Waiter order validation result from the previous context.\n\n"
+                "1. If the Waiter result starts with ORDER_REJECTED, stop immediately and return the same rejection reason. "
+                "Do not check stock, do not suggest alternatives, and do not prepare any dish.\n"
+                "2. If the Waiter result starts with ORDER_NEEDS_ALTERNATIVE, extract the dish and allergy from the context, "
+                "then run the 'Check and Update Stock' tool with dry_run set to True to dynamically get safe alternatives from the menu.\n"
+                "3. If the Waiter result starts with ORDER_CONFIRMED, extract the exact confirmed dish and allergy, then run the "
+                "'Check and Update Stock' tool with dry_run set to True. If the tool returns a safety alert, repeat the safe alternatives. "
                 "If it returns a Kitchen Check success, reply that the dish is approved."
             ),
             expected_output=(
                 "If rejected: the same ORDER_REJECTED message from the Waiter. "
-                "If alternative needed: safe alternatives only. "
+                "If alternative needed: safe alternatives returned by the stock tool. "
                 "If confirmed: the exact kitchen dry-run feedback."
             ),
             agent=agent,

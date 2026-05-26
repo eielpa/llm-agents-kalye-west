@@ -9,6 +9,11 @@ def process_order_stock(dish_name: str, customer_allergy: str = "none", dry_run:
     Set dry_run=False to finalize the order and permanently update inventory.
     """
     try:
+        # --- AGGIUNGI QUESTO FIX DA QUI ---
+        if isinstance(dry_run, str):
+            dry_run = dry_run.strip().lower() in ['true', '1', 'yes']
+        # --- A QUI ---
+
         menu_df = pd.read_csv("order_system/menu.csv")
         stock_df = pd.read_csv("kitchen_system/stock.csv")
         

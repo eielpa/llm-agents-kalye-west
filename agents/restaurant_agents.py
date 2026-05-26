@@ -18,8 +18,9 @@ class RestaurantAgents:
             ),
             tools=[view_restaurant_menu, check_menu_and_allergens, save_order, check_order_status],
             verbose=True,
-            allow_delegation=True,
-            llm="groq/llama-3.3-70b-versatile"
+            allow_delegation=False,
+            max_iter=2,
+            llm=groq_llm
         )
 
     def sushi_chef(self):

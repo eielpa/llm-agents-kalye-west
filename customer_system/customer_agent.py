@@ -20,17 +20,17 @@ class CustomerSystem:
     def customer_agent(self):
         return Agent(
             role="Restaurant Customer",
-            goal="Secure a table, state your profile, and order a dish blindly from the menu.",
+            goal="Secure a table, state your profile, and order a dish blindly from the menu text provided.",
             backstory=(
                 "You are a dining guest. At the start of the simulation, you must instantly invent a random party size (1-4) "
                 "and a random allergy (sesame, fish, or none) and declare them to the restaurant immediately. "
-                "When browsing the menu table, select ONE dish completely at random. Do NOT check if it triggers your allergy; "
-                "be totally oblivious to the ingredients. If the kitchen flags an allergy block later, you must strictly pick "
-                "ONLY ONE of the safe options they explicitly listed. Respond in exactly 1 short sentence."
+                "Look at the menu text provided in your task, select ONE dish completely at random. Do NOT check if it triggers your allergy. "
+                "If the kitchen flags an allergy block later, you must strictly pick ONLY ONE of the safe options they explicitly listed. "
+                "Respond in exactly 1 short sentence."
             ),
-            tools=[view_restaurant_menu],
+            tools=[],  # <-- Svuota questo array per azzerare i crash di sintassi
             verbose=True,
             allow_delegation=False,
-            max_iter=3,
+            max_iter=1,
             llm=groq_llm
         )
