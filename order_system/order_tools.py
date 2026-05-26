@@ -51,8 +51,8 @@ def check_menu_and_allergens(query: str) -> str:
         if dish.empty:
             available = ", ".join(df["dish"].tolist())
             return (
-                f"ORDER_REJECTED: Dish '{dish_name}' is not on the menu. "
-                f"Available dishes are: {available}."
+                f"I'm sorry, '{dish_name}' is not on our menu. "
+                f"We currently offer: {available}."
             )
 
         allergens = str(dish.iloc[0]["allergens"]).lower()
@@ -60,11 +60,11 @@ def check_menu_and_allergens(query: str) -> str:
 
         if allergen != "none" and allergen in allergen_list:
             return (
-                f"ORDER_NEEDS_ALTERNATIVE: {dish_name} contains {allergen}. "
-                f"The order is not safe as requested."
+                f"I can't serve {dish_name} to this guest — it contains {allergen}, "
+                f"which conflicts with their allergy profile. We'll need to find a safe alternative."
             )
 
-        return f"ORDER_SAFE: {dish_name} is on the menu and does not contain {allergen}."
+        return f"{dish_name} is available and contains no {allergen} — it's safe for this guest."
 
     except Exception as e:
         return f"ORDER_ERROR: Ensure format is 'Dish|Allergen'. Details: {str(e)}"
@@ -103,8 +103,7 @@ def save_order(query: str) -> str:
         orders_df.to_csv(ORDERS_PATH, index=False)
 
         return (
-            f"ORDER_SAVED: Order ID {order_id}. "
-            f"Dish: {dish_name}. Status: {status}. Notes: {notes}."
+            f"Order #{order_id} has been saved: {dish_name}, status '{status}'. {notes}."
         )
 
     except Exception as e:

@@ -36,11 +36,11 @@ def process_order_stock(dish_name: str, customer_allergy: str = "none", dry_run:
             safe_dishes_df = menu_df[~menu_df['allergens'].astype(str).str.lower().str.contains(clean_allergy, na=False)]
             safe_alternatives = safe_dishes_df['dish'].tolist()
             
-            feedback = f"KITCHEN BLOCK: Cannot serve {clean_dish} due to hidden '{clean_allergy}' allergy in customer profile! "
+            feedback = f"I can't prepare {clean_dish} for this guest — the dish contains {clean_allergy}, which is flagged in their allergy profile. "
             if can_remove:
-                feedback += f"We can prepare {clean_dish} WITHOUT {clean_allergy}. "
+                feedback += f"We could make it without {clean_allergy} if needed. "
             if safe_alternatives:
-                feedback += f"Or choose a safe alternative: [{', '.join(safe_alternatives)}]."
+                feedback += f"Safe alternatives from our menu: {', '.join(safe_alternatives)}."
             return feedback
 
         # Stock check layer
@@ -49,10 +49,10 @@ def process_order_stock(dish_name: str, customer_allergy: str = "none", dry_run:
             ing = ing.strip()
             stock_item = stock_df[stock_df['ingredient'] == ing]
             if stock_item.empty or int(stock_item.iloc[0]['quantity']) < 1:
-                return f"Kitchen Error: Cannot prepare {clean_dish}. Out of stock for: {ing}."
-                
+                return f"Unfortunately I can't prepare {clean_dish} right now — we're out of {ing}."
+
         if dry_run:
-            return f"Kitchen Check: {clean_dish} is safe and in stock. Ready to be authorized for preparation."
+            return f"{clean_dish} is safe for this guest and we have all the ingredients in stock. Ready to prepare whenever confirmed."
             
         for ing in ingredients:
             ing = ing.strip()
@@ -60,7 +60,7 @@ def process_order_stock(dish_name: str, customer_allergy: str = "none", dry_run:
             
         stock_df.to_csv("kitchen_system/stock.csv", index=False)
         prep_time = dish.iloc[0]['prep_time']
-        return f"Kitchen Success: {clean_dish} is being prepared. Estimated time: {prep_time} minutes."
-        
+        return f"The {clean_dish} is now being prepared. It'll be ready in about {prep_time} minutes."
+
     except Exception as e:
-        return f"Kitchen System Error: {str(e)}"
+        return f"Kitchen error: {str(e)}"

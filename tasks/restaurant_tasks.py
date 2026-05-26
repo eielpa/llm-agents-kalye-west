@@ -5,23 +5,24 @@ class RestaurantTasks:
         return Task(
             description=(
                 "Step 1: Invent a random party size (1 to 4) and a random allergy profile (sesame, fish, or none). "
-                "Step 2: Greet the host and declare BOTH your party size and your allergy profile clearly so the restaurant has it on record."
+                "Step 2: Greet the host naturally and declare both your party size and your allergy profile clearly."
             ),
-            expected_output="A 1-sentence greeting stating party size and allergy profile.",
+            expected_output="A natural 1-sentence greeting stating party size and allergy profile.",
             agent=agent
         )
 
     def seat_customer_task(self, agent, arrival_task):
         return Task(
             description=(
-                f"Read the customer's arrival log in {arrival_task.description}. "
-                "Extract the party size, then call 'Check Seat Availability' with that party size. "
-                "If no seat is available, stop immediately and reply 'No seats available for this party size.' "
+                "From the previous step, extract the party size the customer declared. "
+                "Call 'Check Seat Availability' with that party size. "
+                "If no seat is available, politely let the customer know. "
                 "If a seat is available, call 'Assign Seat' with the seat_id returned, "
                 "then call 'Save Reservation' with format 'seat_id|party_size' to log the reservation. "
-                "Only use seat IDs returned by the availability tool — never invent seat IDs."
+                "Only use seat IDs returned by the availability tool — never invent seat IDs. "
+                "Respond as a friendly host would."
             ),
-            expected_output="A 1-sentence confirmation containing the assigned seat ID and the reservation ID, or a notice that no seats are available.",
+            expected_output="A natural 1-sentence confirmation with the assigned seat and reservation ID, or a polite notice that no seats are available.",
             agent=agent,
             context=[arrival_task]
         )
@@ -29,11 +30,13 @@ class RestaurantTasks:
     def customer_order_task(self, agent, seating_task, menu_string=""):
         return Task(
             description=(
-                f"Read the seating result from the previous context. If it contains 'No seats available', stop.\n"
+                "Read the seating result from the previous step. If no seat was available, stop.\n"
                 f"Otherwise, look at this restaurant menu:\n\n{menu_string}\n\n"
-                "Pick exactly ONE dish from this list completely at random. State your order clearly to the staff in 1 sentence without mentioning allergies."
+                "Pick exactly ONE dish from this list completely at random. "
+                "Tell the staff your order in one natural sentence. "
+                "Do NOT mention your allergy or party size — just state the dish you want."
             ),
-            expected_output="A 1-sentence order stating the exact dish name you chose.",
+            expected_output="A 1-sentence order with only the dish name — do not repeat allergy or party size.",
             agent=agent,
             context=[seating_task]
         )
@@ -42,24 +45,18 @@ class RestaurantTasks:
         return Task(
             description=(
                 "Validate the customer's order before it goes to the kitchen. "
-                "Use the previous context to extract: "
-                "1) the customer's allergy profile, "
-                "2) the exact dish ordered by the customer. "
-                "Then call the tool named `check_menu_and_allergens` with input format 'Dish|Allergen'. "
-                "If the dish is not on the menu, reject the order and do not save it. "
-                "If the dish contains the customer's allergen, return ORDER_NEEDS_ALTERNATIVE and do not save it as confirmed. "
-                "If the dish is safe, call the tool named `save_order` with format "
-                "'Dish|Allergen|confirmed|validated by waiter'. "
-                "Your final answer must start with exactly one of these labels: "
-                "ORDER_CONFIRMED, ORDER_REJECTED, or ORDER_NEEDS_ALTERNATIVE. " \
-                "As soon as the tool returns ORDER_NEEDS_ALTERNATIVE, write your final answer "
-                "immediately starting with ORDER_NEEDS_ALTERNATIVE, include the dish name and "
-                "the allergen, and stop — do not call any tool again."
-                "Always include the exact dish name and allergy in your final answer."
+                "From the previous context extract: 1) the customer's allergy, 2) the exact dish ordered. "
+                "Call check_menu_and_allergens with format 'Dish|Allergen'. "
+                "If the dish is not on the menu, politely decline and explain. "
+                "If the dish contains the allergen, politely tell the guest you cannot serve it and that they need to choose a safe alternative — do not save the order. "
+                "If the dish is safe, call save_order with format 'Dish|Allergen|confirmed|validated by waiter' and confirm the order. "
+                "Respond in friendly, natural English as a waiter speaking to a guest. "
+                "As soon as the tool indicates an allergy conflict, write your response immediately and stop — do not call any tool again."
             ),
             expected_output=(
-                "A short order validation result. If safe, include the saved order ID. "
-                "If unsafe or unavailable, explain why the order was not confirmed."
+                "A natural, friendly sentence. If safe: confirm the order was placed. "
+                "If unsafe: explain the issue and mention that an alternative is needed. "
+                "If not on menu: politely decline."
             ),
             agent=agent,
             context=[arrival_task, order_task]
@@ -68,44 +65,52 @@ class RestaurantTasks:
     def kitchen_allergy_check_task(self, agent, waiter_task):
         return Task(
             description=(
-                "Read the Waiter order validation result from the previous context.\n\n"
-                "1. If the Waiter result starts with ORDER_REJECTED, stop immediately and return the same rejection reason. "
-                "Do not check stock, do not suggest alternatives, and do not prepare any dish.\n"
-                "2. If the Waiter result starts with ORDER_NEEDS_ALTERNATIVE, extract the dish and allergy from the context, "
-                "then run the 'Check and Update Stock' tool with dry_run set to True to dynamically get safe alternatives from the menu.\n"
-                "3. If the Waiter result starts with ORDER_CONFIRMED, extract the exact confirmed dish and allergy, then run the "
-                "'Check and Update Stock' tool with dry_run set to True. If the tool returns a safety alert, repeat the safe alternatives. "
-                "If it returns a Kitchen Check success, reply that the dish is approved."
+                "Read the waiter's response from the previous step.\n\n"
+                "1. If the waiter said the dish is not on the menu, stop immediately and pass on the same message.\n"
+                "2. If the waiter said the dish contains an allergen and a safe alternative is needed, run 'Check and Update Stock' "
+                "ONCE with the original dish name and the customer's allergen, with dry_run=True. "
+                "The tool will return safe alternatives automatically — report those alternatives to the team. "
+                "Do NOT run the tool again for each alternative.\n"
+                "3. If the waiter confirmed the order, run 'Check and Update Stock' with dry_run=True for the confirmed dish. "
+                "If the tool flags an allergy issue, list the safe alternatives. "
+                "If the tool confirms the dish is safe and in stock, approve it.\n"
+                "Respond naturally as a chef briefing the team."
             ),
             expected_output=(
-                "If rejected: the same ORDER_REJECTED message from the Waiter. "
-                "If alternative needed: safe alternatives returned by the stock tool. "
-                "If confirmed: the exact kitchen dry-run feedback."
+                "A natural sentence from the chef. If rejected: pass on the rejection. "
+                "If an alternative is needed: list the safe options returned by the tool. "
+                "If confirmed: confirm the dish is approved and ready."
             ),
             agent=agent,
             context=[waiter_task]
         )
 
-    def customer_decision_task(self, agent, kitchen_task):
+    def customer_decision_task(self, agent, waiter_task, kitchen_task):
         return Task(
             description=(
-                f"Read the kitchen response in {kitchen_task.description}. If the kitchen blocked your item, "
-                "respond by choosing exactly ONE option from the safe paths they provided. "
-                "If the kitchen approved your original dish, simply reply: 'Please proceed with the original order'."
+                "Read the waiter's and kitchen's responses from the previous steps carefully. "
+                "If the waiter said the dish cannot be served due to an allergy conflict, "
+                "and the kitchen offered safe alternatives, you MUST choose exactly ONE dish from those alternatives — "
+                "you cannot have the original dish. State only the dish name you are choosing. "
+                "Only say 'Please proceed with the original order' if both the waiter AND the kitchen confirmed "
+                "the original dish is fully safe and approved."
             ),
-            expected_output="A 1-sentence final decision statement specifying a single menu item.",
+            expected_output="A 1-sentence statement naming the exact dish you are ordering.",
             agent=agent,
-            context=[kitchen_task]
+            context=[waiter_task, kitchen_task]
         )
 
-    def finalize_cooking_task(self, agent, decision_task):
+    def finalize_cooking_task(self, agent, order_task, decision_task):
         return Task(
             description=(
-                f"Read the customer's definitive choice from {decision_task.description}. "
-                "Run the 'Check and Update Stock' tool for that exact dish name with 'dry_run' set to False to permanently update stock and begin cooking. "
-                "CRITICAL: You must output the exact text returned by the tool as your final answer. Do not invent dish names."
+                "From the previous steps, identify the exact dish the customer finally chose. "
+                "If the customer named a specific dish, use that exact name. "
+                "If the customer said 'proceed with the original order', look at the original order context to find the exact dish name. "
+                "Also extract the customer's allergen from context. "
+                "Call 'Check and Update Stock' with dry_run=False and the allergen to begin cooking. "
+                "Translate the tool's response into a natural sentence for the guest — do not copy the tool output verbatim."
             ),
-            expected_output="The exact success or preparation time message returned by the stock tool.",
+            expected_output="A natural sentence confirming the dish being prepared and the estimated time.",
             agent=agent,
-            context=[decision_task]
+            context=[order_task, decision_task]
         )

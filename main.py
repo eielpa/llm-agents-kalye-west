@@ -42,8 +42,8 @@ def run_simulation():
     t3 = tasks.customer_order_task(customer, t2, menu_string) # <-- Passa menu_string qui
     t4 = tasks.waiter_order_validation_task(waiter, t1, t3)
     t5 = tasks.kitchen_allergy_check_task(chef, t4)
-    t6 = tasks.customer_decision_task(customer, t5)
-    t7 = tasks.finalize_cooking_task(chef, t6)
+    t6 = tasks.customer_decision_task(customer, t4, t5)
+    t7 = tasks.finalize_cooking_task(chef, t3, t6)
 
     restaurant_crew = Crew(
         agents=[customer, seating_mgr, waiter, chef],
@@ -57,3 +57,4 @@ def run_simulation():
 
 if __name__ == "__main__":
     run_simulation()
+    import reset
