@@ -44,6 +44,9 @@ def save_reservation(query: str) -> str:
     try:
         seat_id, party_size = query.split("|")
         seat_id, party_size = seat_id.strip(), party_size.strip()
+        seats_df = pd.read_csv("seating_system/seats.csv")
+        if seat_id not in seats_df['seat_id'].values:
+            return f"Reservation error: seat {seat_id} does not exist."
         df = pd.read_csv("seating_system/reservations.csv")
         reservation_id = len(df) + 1
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

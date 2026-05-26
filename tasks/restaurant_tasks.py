@@ -15,10 +15,13 @@ class RestaurantTasks:
         return Task(
             description=(
                 f"Read the customer's arrival log in {arrival_task.description}. "
-                "Extract the party size, verify availability with 'Check Seat Availability', and assign the seat with 'Assign Seat'. "
-                "Then call 'Save Reservation' with format 'seat_id|party_size' to log the reservation."
+                "Extract the party size, then call 'Check Seat Availability' with that party size. "
+                "If no seat is available, stop immediately and reply 'No seats available for this party size.' "
+                "If a seat is available, call 'Assign Seat' with the seat_id returned, "
+                "then call 'Save Reservation' with format 'seat_id|party_size' to log the reservation. "
+                "Only use seat IDs returned by the availability tool — never invent seat IDs."
             ),
-            expected_output="A 1-sentence confirmation containing the assigned seat ID and the reservation ID.",
+            expected_output="A 1-sentence confirmation containing the assigned seat ID and the reservation ID, or a notice that no seats are available.",
             agent=agent,
             context=[arrival_task]
         )
