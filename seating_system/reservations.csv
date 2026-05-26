@@ -1,1 +1,5 @@
 reservation_id,seat_id,party_size,status,timestamp
+1,T2,3,confirmed,2026-05-26 15:32:11
+2,T3,3,confirmed,2026-05-26 15:47:34
+3,T2,3,confirmed,2026-05-26 16:25:02
+4,T4,3,confirmed,2026-05-26 16:35:14
