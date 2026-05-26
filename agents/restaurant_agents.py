@@ -1,5 +1,5 @@
 from crewai import Agent, LLM
-from order_system.order_tools import check_allergens
+from order_system.order_tools import view_restaurant_menu, check_menu_and_allergens, save_order, check_order_status
 from kitchen_system.kitchen_tools import process_order_stock
 
 groq_llm = LLM(
@@ -11,13 +11,15 @@ class RestaurantAgents:
     def waiter(self):
         return Agent(
             role="Waiter",
-            goal="Validate allergen safety using exactly 1 sentence.",
-            backstory="Sushi waiter. You take the chosen dish and allergy, check them with your tool, and output a 1-sentence verdict.",
-            tools=[check_allergens],
+            goal="Validate customer orders, check menu availability, check allergies, save accepted orders, and reject unsafe orders.",
+            backstory=(
+                "You are a careful restaurant waiter. Your job is to protect customers from allergens, "
+                "make sure dishes exist on the menu, and record only valid customer orders."
+            ),
+            tools=[view_restaurant_menu, check_menu_and_allergens, save_order, check_order_status],
             verbose=True,
-            allow_delegation=False,
-            max_iter=3,
-            llm=groq_llm
+            allow_delegation=True,
+            llm="groq/llama-3.3-70b-versatile"
         )
 
     def sushi_chef(self):
